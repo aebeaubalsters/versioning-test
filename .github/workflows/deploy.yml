@@ -1,36 +1,54 @@
-# This is a basic workflow to help you get started with Actions
+name: Deploy
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "develop" branch
   push:
-    branches: [ "develop" ]
-  pull_request:
-    branches: [ "develop" ]
+    branches:
+      - release/**
+      - hotfix/**
+      - patch/**
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  deploy:
+    permissions: write-all
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    if: "!contains(github.event.head_commit.message, '[skip cd]')"
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - name: Set ShouldPackage
+        id: shouldPackage
+        run: | # we only want to package when we push to the release or hotfix branches.
+          echo "##[set-output name=wellShouldWe;]$(if [[ $GITHUB_REF != 'refs/heads/main' && ( $GITHUB_REF == refs/heads/release/* || $GITHUB_REF == refs/heads/hotfix/*  ) ]]; then echo true; else echo false; fi)"
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: get version
+        id: getVersion
+        if: ${{ steps.shouldPackage.outputs.wellShouldWe }}
+        run: | # pull the version from the name of the branch.
+          echo "##[set-output name=version;]$(
+            majorMinorRev=$(grep -m1 version package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g');
+            runNumber=${{ github.run_number }}
+            echo "$majorMinorRev.$runNumber";
+          )"
+      - name: set release channel
+        id: getReleaseChannel
+        if: ${{ steps.shouldPackage.outputs.wellShouldWe }}
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          echo "##[set-output name=channel;]$(
+            if [[ $GITHUB_REF == refs/heads/release/* ]]; then
+              echo "Default"; 
+            elif [[ $GITHUB_REF == refs/heads/hotfix/* ]]; then
+              echo "Hotfix"; 
+            else
+              echo "Default";
+            fi
+          )"
+
+      - name: create github release
+        if: ${{ steps.shouldPackage.outputs.wellShouldWe }}
+        uses: softprops/action-gh-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: true
+          name: ${{ steps.getVersion.outputs.version }}
+          tag_name: ${{ steps.getVersion.outputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
