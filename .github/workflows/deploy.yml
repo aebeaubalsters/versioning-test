@@ -50,7 +50,7 @@ jobs:
         with:
           draft: false
           prerelease: true
-          name: ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}#*/
+          tag_name: ${{ github.ref_name }}#*/
           token: ${{ secrets.GITHUB_TOKEN }}
 
