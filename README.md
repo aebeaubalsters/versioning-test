@@ -1,4 +1,4 @@
-MISC-5
+MISC-6
 ```
 function test() {
   console.log("notice the blank line before this function?");
