@@ -21,12 +21,23 @@ jobs:
       - name: get version
         id: getVersion
         if: ${{ steps.shouldPackage.outputs.wellShouldWe }}
-        run: | # pull the version from the name of the branch.
-          echo "##[set-output name=version;]$(
-            majorMinorRev=$(grep -m1 version package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g');
-            runNumber=${{ github.run_number }}
-            echo "$majorMinorRev.$runNumber";
-          )"
+        run: | 
+          # Get the feature/version
+          fullName="${{ github.ref_name }}"
+          
+          # Example: If the branch is "feature/user-abc-task", and you want "user-abc-task"
+          # This removes everything up to and including the first '/'
+          version="${fullName#*/}"
+
+          # Set the result as a step output and environment variable for later use
+          echo "versionNumber=$version" >> $GITHUB_OUTPUT
+          echo "versionNumber=$version" >> $GITHUB_ENV
+#        # pull the version from the name of the branch.
+#          echo "##[set-output name=version;]$(
+#            majorMinorRev=$(grep -m1 version package.json | awk -F: '{ print $2 }' | sed 's/[", ]//g');
+#            runNumber=${{ github.run_number }}
+#            echo "$majorMinorRev.$runNumber";
+#          )"
       - name: set release channel
         id: getReleaseChannel
         if: ${{ steps.shouldPackage.outputs.wellShouldWe }}
@@ -50,7 +61,7 @@ jobs:
         with:
           draft: false
           prerelease: true
-          name: ${{ github.ref_name }}#*/
-          tag_name: ${{ github.ref_name }}#*/
+          name: $versionNumber
+          tag_name: $versionNumber
           token: ${{ secrets.GITHUB_TOKEN }}
 
