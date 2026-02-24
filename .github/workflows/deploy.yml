@@ -61,7 +61,7 @@ jobs:
         with:
           draft: false
           prerelease: true
-          name: $versionNumber
-          tag_name: $versionNumber
+          name: ${{ steps.getVersion.outputs.versionNumber }}
+          tag_name: ${{ steps.getVersion.outputs.versionNumber }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
