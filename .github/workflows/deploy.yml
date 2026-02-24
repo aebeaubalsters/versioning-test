@@ -50,7 +50,7 @@ jobs:
         with:
           draft: false
           prerelease: true
-          name: 1.0.4
-          tag_name: 1.0.4
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
