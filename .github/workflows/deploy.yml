@@ -1,11 +1,17 @@
 name: Deploy
 
+#on:
+#  push:
+#    branches:
+#      - release/**
+#      - hotfix/**
+#      - patch/**
+
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
-      - release/**
-      - hotfix/**
-      - patch/**
+      - main
 
 jobs:
   deploy:
