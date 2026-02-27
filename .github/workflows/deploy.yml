@@ -24,7 +24,6 @@ jobs:
         id: create_release
         with:
           draft: false
-          prerelease: true
           name: ${{ steps.getVersion.outputs.versionNumber }}
           tag_name: ${{ steps.getVersion.outputs.versionNumber }}
           body: ${{ github.event.pull_request.body }}
