@@ -1,4 +1,4 @@
-Patch 1.1.6
+Patch 1.1.7
 ```
 function test() {
   console.log("notice the blank line before this function?");
