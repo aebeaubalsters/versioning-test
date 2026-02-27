@@ -17,39 +17,16 @@ jobs:
   deploy:
     permissions: write-all
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip cd]')"
+    if: github.event.pull_request.merged == true
     steps:
-      - name: Set ShouldPackage
-        id: shouldPackage
-        run: | # we only want to package when we push to the release or hotfix branches.
-          echo "##[set-output name=wellShouldWe;]$(if [[ $GITHUB_REF != 'refs/heads/main' && ( $GITHUB_REF == refs/heads/release/* || $GITHUB_REF == refs/heads/hotfix/* || $GITHUB_REF == refs/heads/patch/*  ) ]]; then echo true; else echo false; fi)"
-
       - name: get version
         id: getVersion
-        if: ${{ steps.shouldPackage.outputs.wellShouldWe }}
         run: | # pull the version from the name of the branch.
-          fullName="${{ github.ref_name }}"
+          fullName="${{ github.head_ref }}"
           version="${fullName#*/}"
           echo "versionNumber=$version" >> $GITHUB_OUTPUT
 
-      - name: set release channel
-        id: getReleaseChannel
-        if: ${{ steps.shouldPackage.outputs.wellShouldWe }}
-        run: |
-          echo "##[set-output name=channel;]$(
-            if [[ $GITHUB_REF == refs/heads/release/* ]]; then
-              echo "Default"; 
-            elif [[ $GITHUB_REF == refs/heads/hotfix/* ]]; then
-              echo "Hotfix"; 
-            elif [[ $GITHUB_REF == refs/heads/patch/* ]]; then
-              echo "Patch";   
-            else
-              echo "Default";
-            fi
-          )"
-
       - name: create github release
-        if: ${{ steps.shouldPackage.outputs.wellShouldWe }}
         uses: softprops/action-gh-release@v1
         id: create_release
         with:
@@ -57,5 +34,6 @@ jobs:
           prerelease: true
           name: ${{ steps.getVersion.outputs.versionNumber }}
           tag_name: ${{ steps.getVersion.outputs.versionNumber }}
+          body: ${{ github.event.pull_request.body }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
