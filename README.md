@@ -1,4 +1,4 @@
-Release 1.2.0
+Release 1.2.1
 ```
 function test() {
   console.log("notice the blank line before this function?");
