@@ -13,7 +13,7 @@ jobs:
     if: github.event.pull_request.merged == true
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -29,26 +29,17 @@ jobs:
         if: startsWith(github.head_ref, 'patch/')
         id: increment_patch_version
         run: | # Get the latest tag from the repository and increment the patch version.
-          TAGS=$(git tag -l | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$')
-          if [ -z "$TAGS" ]; then
-            echo "No semver-like tags found"
-            exit 1
-          fi
-          LATEST_TAG=$(echo "$TAGS" | sort -V | tail -n 1)
-          echo "versionNumber=$LATEST_TAG" >> $GITHUB_ENV
-          echo "Latest tag: $LATEST_TAG"
+          tags=$(git tag -l | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$')
+          latestTag=$(echo "$tags" | sort -V | tail -n 1)
           
-          MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
-          MINOR=$(echo $LATEST_TAG | cut -d. -f2)
-          PATCH=$(echo $LATEST_TAG | cut -d. -f3)
-          echo "Current version: $MAJOR.$MINOR.$PATCH"
+          major=$(echo $latestTag | cut -d. -f1)
+          minor=$(echo $latestTag | cut -d. -f2)
+          patch=$(echo $latestTag | cut -d. -f3)
+          patch=$((patch + 1))
           
-          PATCH=$((PATCH + 1))
-          echo "Incremented patch version: $PATCH"
-          
-          NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          echo "Next version: $NEXT_VERSION"
-          echo "versionNumber=$NEXT_VERSION" >> $GITHUB_ENV
+          nextVersion="${major}.${minor}.${patch}"
+          echo "Next version: $nextVersion"
+          echo "versionNumber=$nextVersion" >> $GITHUB_ENV
 
 
       - name: create github release
