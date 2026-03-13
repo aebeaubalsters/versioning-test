@@ -34,7 +34,8 @@ jobs:
           
           major=$(echo $latestTag | cut -d. -f1)
           minor=$(echo $latestTag | cut -d. -f2)
-          patch=$((echo $latestTag | cut -d. -f3) + 1)
+          patch=$((echo $latestTag | cut -d. -f3)
+          patch=$((patch + 1))
           
           nextVersion="${major}.${minor}.${patch}"
           echo "Next version: $nextVersion"
