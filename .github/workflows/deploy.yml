@@ -47,7 +47,7 @@ jobs:
 
       - name: create github release
       #  if: github.head_ref == 'release/*' || github.head_ref == 'hotfix/*'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         id: create_release
         with:
           draft: false
