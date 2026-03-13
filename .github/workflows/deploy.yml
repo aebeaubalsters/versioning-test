@@ -47,6 +47,7 @@ jobs:
           NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "Next version: $NEXT_VERSION"
           echo "versionNumber=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "ENV versionNumber variable: ${{ env.versionNumber }}"
 
 
       - name: create github release
