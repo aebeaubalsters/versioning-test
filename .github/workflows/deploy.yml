@@ -29,7 +29,7 @@ jobs:
         if: startsWith(github.head_ref, 'patch/')
         id: increment_patch_version
         run: | # Get the latest tag from the repository and increment the patch version.
-          LATEST_TAG=$(git tag --sort=-creatordate | head -n 1)
+          LATEST_TAG=$(git describe --tags --abbrev=0)
           echo "Latest tag: $LATEST_TAG"
           
           MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
