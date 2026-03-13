@@ -28,20 +28,24 @@ jobs:
       - name: increment patch version
         if: startsWith(github.head_ref, 'patch/')
         id: increment_patch_version
-        run: | # increment the patch version by 1. For example, if the latest tag is 1.2.3, the new version will be 1.2.4
-          # get the latest tag from the repository
-          latestTag=$(git describe --tags --abrev=0)
-          echo "latestTag=$latestTag"
-
-          # split the version into its components
-          IFS='.' read -r major minor patch <<< "$latestTag"
-
-          # increment the patch version
-          patch=$((patch + 1))
-
-          # create the new version string
-          newVersion="$major.$minor.$patch"
-          echo "versionNumber=$newVersion" >> $GITHUB_ENV
+        run: |
+          # Get the latest tag, remove 'v' prefix if present
+          LATEST_TAG=$(git describe --tags --abbrev=0 | sed 's/^v//')
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="1.3.0" # Default initial version if no tags exist
+          fi
+          
+          # Split the version number into parts
+          MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
+          MINOR=$(echo $LATEST_TAG | cut -d. -f2)
+          PATCH=$(echo $LATEST_TAG | cut -d. -f3)
+          
+          # Increment the patch version
+          PATCH=$((PATCH + 1))
+          
+          NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Next version: $NEXT_VERSION"
+          echo "versionNumber=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
 
       - name: create github release
