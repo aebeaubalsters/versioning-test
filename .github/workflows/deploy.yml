@@ -29,12 +29,15 @@ jobs:
         id: increment_patch_version
         run: | # Get the latest tag from the repository and increment the patch version.
           LATEST_TAG=$(git tag --sort=-creatordate | head -n 1)
+          echo "Latest tag: $LATEST_TAG"
           
           MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
           MINOR=$(echo $LATEST_TAG | cut -d. -f2)
           PATCH=$(echo $LATEST_TAG | cut -d. -f3)
+          echo "Current version: $MAJOR.$MINOR.$PATCH"
           
           PATCH=$((PATCH + 1))
+          echo "Incremented patch version: $PATCH"
           
           NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "Next version: $NEXT_VERSION"
