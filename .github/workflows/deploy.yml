@@ -31,7 +31,7 @@ jobs:
         id: increment_patch_version
         run: |
           # Get the latest tag, remove 'v' prefix if present
-          LATEST_TAG=$(git describe --tags --abbrev=0 | sed 's/^v//')
+          LATEST_TAG=$(git tag --sort=-creatordate | head -n 1 | sed 's/^v//')
           echo "Latest tag: $LATEST_TAG"
           
           # Split the version number into parts
