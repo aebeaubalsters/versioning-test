@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
-      #- name: Set dynamic variable
-      #  run: |
-      #    DYNAMIC_VAR="Hello, World!"
-      #    echo "DYNAMIC_VAR=${DYNAMIC_VAR}" >> $GITHUB_ENV
+      - name: Set dynamic variable
+        run: |
+          versionNumber="Hello, World!"
+          echo "versionNumber=${versionNumber}" >> $GITHUB_ENV
         # The variable is set for future steps in this job.
       - name: get version
         if: github.head_ref == 'release/*' || github.head_ref == 'hotfix/*'
@@ -45,7 +45,7 @@ jobs:
 
 
       - name: create github release
-        if: github.head_ref == 'release/*' || github.head_ref == 'hotfix/*'
+      #  if: github.head_ref == 'release/*' || github.head_ref == 'hotfix/*'
         uses: softprops/action-gh-release@v1
         id: create_release
         with:
