@@ -51,8 +51,8 @@ jobs:
         id: create_release
         with:
           draft: false
-          name: "$versionNumber"
-          tag_name: "$versionNumber"
+          name: ${{ env.versionNumber }}
+          tag_name: ${{ env.versionNumber }}
           body: ${{ github.event.pull_request.body }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
