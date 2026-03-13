@@ -16,6 +16,7 @@ jobs:
         run: |
           versionNumber="Hello, World!"
           echo "versionNumber=${versionNumber}" >> $GITHUB_ENV
+          echo "${{ github.head_ref }}"
         # The variable is set for future steps in this job.
       - name: get version
         if: github.head_ref == 'release/*' || github.head_ref == 'hotfix/*'
