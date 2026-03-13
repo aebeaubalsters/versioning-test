@@ -17,6 +17,7 @@ jobs:
         with:
           # Fetch all history and tags
           fetch-depth: 0
+          fetch-tags: true
       - name: get version
         if: startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/')
         id: getVersion
