@@ -12,12 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
-      #- name: Set dynamic variable
-      #  run: |
-      #    versionNumber="Hello, World!"
-      #    echo "versionNumber=${versionNumber}" >> $GITHUB_ENV
-      #    echo "${{ github.head_ref }}"
-        # The variable is set for future steps in this job.
       - name: get version
         if: startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/')
         id: getVersion
@@ -55,16 +49,4 @@ jobs:
           tag_name: ${{ env.versionNumber }}
           body: ${{ github.event.pull_request.body }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-
-      #- name: auto increment version
-      #  if: github.head_ref == 'patch/*'
-      #  uses: softprops/action-gh-release@v1
-      #  id: auto_increment_version
-      #   with:
-      #   draft: false
-      #    name: ${{ steps.getVersion.outputs.versionNumber }}
-      #    tag_name: ${{ steps.getVersion.outputs.versionNumber }}
-      #    body: ${{ github.event.pull_request.body }}
-      #    token: ${{ secrets.GITHUB_TOKEN }}
 
