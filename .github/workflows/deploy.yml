@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
-      - name: Set dynamic variable
-        run: |
-          versionNumber="Hello, World!"
-          echo "versionNumber=${versionNumber}" >> $GITHUB_ENV
-          echo "${{ github.head_ref }}"
+      #- name: Set dynamic variable
+      #  run: |
+      #    versionNumber="Hello, World!"
+      #    echo "versionNumber=${versionNumber}" >> $GITHUB_ENV
+      #    echo "${{ github.head_ref }}"
         # The variable is set for future steps in this job.
       - name: get version
-        if: github.head_ref == 'release/*' || github.head_ref == 'hotfix/*'
+        if: startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/')
         id: getVersion
         run: | # pull the version from the name of the branch.
           fullName="${{ github.head_ref }}"
@@ -27,7 +27,7 @@ jobs:
           echo "versionNumber=$version" >> $GITHUB_ENV
 
       - name: increment patch version
-        if: github.head_ref == 'patch/*'
+        if: startsWith(github.head_ref, 'patch/')
         id: increment_patch_version
         run: | # increment the patch version by 1. For example, if the latest tag is 1.2.3, the new version will be 1.2.4
           # get the latest tag from the repository
