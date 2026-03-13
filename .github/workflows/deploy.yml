@@ -15,9 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Fetch all history and tags
           fetch-depth: 0
-          fetch-tags: true
       - name: get version
         if: startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/')
         id: getVersion
@@ -29,30 +27,22 @@ jobs:
       - name: increment patch version
         if: startsWith(github.head_ref, 'patch/')
         id: increment_patch_version
-        run: |
-          # Get the latest tag, remove 'v' prefix if present
-          LATEST_TAG=$(git tag --sort=-creatordate | head -n 1 | sed 's/^v//')
-          echo "Latest tag: $LATEST_TAG"
+        run: | # Get the latest tag from the repository and increment the patch version.
+          LATEST_TAG=$(git tag --sort=-creatordate | head -n 1)
           
-          # Split the version number into parts
           MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
           MINOR=$(echo $LATEST_TAG | cut -d. -f2)
           PATCH=$(echo $LATEST_TAG | cut -d. -f3)
-          echo "Current version: $MAJOR.$MINOR.$PATCH"
           
-          # Increment the patch version
           PATCH=$((PATCH + 1))
-          echo "Incremented patch version: $PATCH"
           
           NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "Next version: $NEXT_VERSION"
-          echo "versionNumber=$NEXT_VERSION" >> $GITHUB_OUTPUT
-          echo "ENV versionNumber variable: ${{ env.versionNumber }}"
+          echo "versionNumber=$NEXT_VERSION" >> $GITHUB_ENV
 
 
       - name: create github release
-      #  if: github.head_ref == 'release/*' || github.head_ref == 'hotfix/*'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         id: create_release
         with:
           draft: false
