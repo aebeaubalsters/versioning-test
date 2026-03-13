@@ -12,13 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
-      #- name: Set dynamic variable
-      #  run: |
-      #    DYNAMIC_VAR="Hello, World!"
-      #    echo "DYNAMIC_VAR=${DYNAMIC_VAR}" >> $GITHUB_ENV
-        # The variable is set for future steps in this job.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - name: get version
-        if: github.head_ref == 'release/*' || github.head_ref == 'hotfix/*'
+        if: startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'hotfix/')
         id: getVersion
         run: | # pull the version from the name of the branch.
           fullName="${{ github.head_ref }}"
@@ -26,44 +26,38 @@ jobs:
           echo "versionNumber=$version" >> $GITHUB_ENV
 
       - name: increment patch version
-        if: github.head_ref == 'patch/*'
+        if: startsWith(github.head_ref, 'patch/')
         id: increment_patch_version
-        run: | # increment the patch version by 1. For example, if the latest tag is 1.2.3, the new version will be 1.2.4
-          # get the latest tag from the repository
-          latestTag=$(git describe --tags --abrev=0)
-          echo "latestTag=$latestTag"
-
-          # split the version into its components
-          IFS='.' read -r major minor patch <<< "$latestTag"
-
-          # increment the patch version
-          patch=$((patch + 1))
-
-          # create the new version string
-          newVersion="$major.$minor.$patch"
-          echo "versionNumber=$newVersion" >> $GITHUB_ENV
+        run: | # Get the latest tag from the repository and increment the patch version.
+          TAGS=$(git tag -l | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$')
+          if [ -z "$TAGS" ]; then
+            echo "No semver-like tags found"
+            exit 1
+          fi
+          LATEST_TAG=$(echo "$TAGS" | sort -V | tail -n 1)
+          echo "versionNumber=$LATEST_TAG" >> $GITHUB_ENV
+          echo "Latest tag: $LATEST_TAG"
+          
+          MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
+          MINOR=$(echo $LATEST_TAG | cut -d. -f2)
+          PATCH=$(echo $LATEST_TAG | cut -d. -f3)
+          echo "Current version: $MAJOR.$MINOR.$PATCH"
+          
+          PATCH=$((PATCH + 1))
+          echo "Incremented patch version: $PATCH"
+          
+          NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Next version: $NEXT_VERSION"
+          echo "versionNumber=$NEXT_VERSION" >> $GITHUB_ENV
 
 
       - name: create github release
-        if: github.head_ref == 'release/*' || github.head_ref == 'hotfix/*'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         id: create_release
         with:
           draft: false
-          name: $versionNumber
-          tag_name: $versionNumber
+          name: ${{ env.versionNumber }}
+          tag_name: ${{ env.versionNumber }}
           body: ${{ github.event.pull_request.body }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-
-      #- name: auto increment version
-      #  if: github.head_ref == 'patch/*'
-      #  uses: softprops/action-gh-release@v1
-      #  id: auto_increment_version
-      #   with:
-      #   draft: false
-      #    name: ${{ steps.getVersion.outputs.versionNumber }}
-      #    tag_name: ${{ steps.getVersion.outputs.versionNumber }}
-      #    body: ${{ github.event.pull_request.body }}
-      #    token: ${{ secrets.GITHUB_TOKEN }}
 
